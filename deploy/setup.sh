@@ -20,7 +20,8 @@ git clone $PROJECT_GIT_URL $PROJECT_BASE_PATH
 
 python3 -m venv $PROJECT_BASE_PATH/env
 
-$PROJECT_BASE_PATH/env/bin/pip install -r $PROJECT_BASE_PATH/requirements.txt uwsgi
+# Added uwsgi and setuptools for full Python 3.12 compatibility
+$PROJECT_BASE_PATH/env/bin/pip install -r $PROJECT_BASE_PATH/requirements.txt uwsgi setuptools
 
 # Run migrations
 $PROJECT_BASE_PATH/env/bin/python $PROJECT_BASE_PATH/manage.py migrate

@@ -10,17 +10,18 @@ PROJECT_BASE_PATH='/usr/local/apps/profiles-rest-api'
 # Set Ubuntu Language
 locale-gen en_GB.UTF-8
 
-# Install Python, SQLite and pip
+# Install Python 3.11, SQLite and pip
 echo "Installing dependencies..."
 apt-get update
-apt-get install -y python3-dev python3-venv sqlite3 python3-pip supervisor nginx git
+apt-get install -y python3.11-dev python3.11-venv sqlite3 python3-pip supervisor nginx git
 
 mkdir -p $PROJECT_BASE_PATH
 git clone $PROJECT_GIT_URL $PROJECT_BASE_PATH
 
-python3 -m venv $PROJECT_BASE_PATH/env
+# Create the virtual environment using Python 3.11 explicitly
+python3.11 -m venv $PROJECT_BASE_PATH/env
 
-# Added uwsgi and setuptools for full Python 3.12 compatibility
+# Install dependencies inside the Python 3.11 environment
 $PROJECT_BASE_PATH/env/bin/pip install -r $PROJECT_BASE_PATH/requirements.txt uwsgi setuptools
 
 # Run migrations

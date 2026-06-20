@@ -10,19 +10,25 @@ PROJECT_BASE_PATH='/usr/local/apps/profiles-rest-api'
 # Set Ubuntu Language
 locale-gen en_GB.UTF-8
 
-# Install Python 3.11, SQLite and pip
-echo "Installing dependencies..."
+# Install software-properties-common to allow adding repositories
 apt-get update
-apt-get install -y python3.11-dev python3.11-venv sqlite3 python3-pip supervisor nginx git
+apt-get install -y software-properties-common
+
+# Add deadsnakes repository for legacy Python versions
+add-apt-repository -y ppa:deadsnakes/ppa
+apt-get update
+
+# Install Python 3.6, SQLite and dependencies
+echo "Installing dependencies..."
+apt-get install -y python3.6-dev python3.6-venv sqlite3 python3-pip supervisor nginx git
 
 mkdir -p $PROJECT_BASE_PATH
 git clone $PROJECT_GIT_URL $PROJECT_BASE_PATH
 
-# Create the virtual environment using Python 3.11 explicitly
-python3.11 -m venv $PROJECT_BASE_PATH/env
+# Force the environment to use Python 3.6 natively
+python3.6 -m venv $PROJECT_BASE_PATH/env
 
-# Install dependencies inside the Python 3.11 environment
-$PROJECT_BASE_PATH/env/bin/pip install -r $PROJECT_BASE_PATH/requirements.txt uwsgi setuptools
+$PROJECT_BASE_PATH/env/bin/pip install -r $PROJECT_BASE_PATH/requirements.txt uwsgi==2.0.21
 
 # Run migrations
 $PROJECT_BASE_PATH/env/bin/python $PROJECT_BASE_PATH/manage.py migrate

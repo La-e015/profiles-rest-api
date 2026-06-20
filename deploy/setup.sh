@@ -2,38 +2,28 @@
 
 set -e
 
-# TODO: Set to URL of git repo.
 PROJECT_GIT_URL='https://github.com/La-e015/profiles-rest-api.git'
-
 PROJECT_BASE_PATH='/usr/local/apps/profiles-rest-api'
 
 # Set Ubuntu Language
 locale-gen en_GB.UTF-8
 
-# Install software-properties-common to allow adding repositories
-apt-get update
-apt-get install -y software-properties-common
-
-# Add deadsnakes repository for legacy Python versions
-add-apt-repository -y ppa:deadsnakes/ppa
-apt-get update
-
-# Install Python 3.6, SQLite and dependencies
+# Install dependencies
 echo "Installing dependencies..."
-apt-get install -y python3.6-dev python3.6-venv sqlite3 python3-pip supervisor nginx git
+apt-get update
+apt-get install -y python3-dev python3-venv sqlite3 python3-pip supervisor nginx git
 
 mkdir -p $PROJECT_BASE_PATH
 git clone $PROJECT_GIT_URL $PROJECT_BASE_PATH
 
-# Force the environment to use Python 3.6 natively
-python3.6 -m venv $PROJECT_BASE_PATH/env
+# Create virtual environment
+python3 -m venv $PROJECT_BASE_PATH/env
 
-$PROJECT_BASE_PATH/env/bin/pip install -r $PROJECT_BASE_PATH/requirements.txt uwsgi==2.0.21
+# Install modern versions + uwsgi and setuptools
+$PROJECT_BASE_PATH/env/bin/pip install -r $PROJECT_BASE_PATH/requirements.txt uwsgi setuptools
 
-# Run migrations
+# Run migrations and collect static files
 $PROJECT_BASE_PATH/env/bin/python $PROJECT_BASE_PATH/manage.py migrate
-
-# Collect static files
 $PROJECT_BASE_PATH/env/bin/python $PROJECT_BASE_PATH/manage.py collectstatic --noinput
 
 # Setup Supervisor to run our uwsgi process.
@@ -44,8 +34,8 @@ supervisorctl restart profiles_api
 
 # Setup nginx to make our application accessible.
 cp $PROJECT_BASE_PATH/deploy/nginx_profiles_api.conf /etc/nginx/sites-available/profiles_api.conf
-rm /etc/nginx/sites-enabled/default
-ln -s /etc/nginx/sites-available/profiles_api.conf /etc/nginx/sites-enabled/profiles_api.conf
+rm -f /etc/nginx/sites-enabled/default
+ln -sf /etc/nginx/sites-available/profiles_api.conf /etc/nginx/sites-enabled/profiles_api.conf
 systemctl restart nginx.service
 
 echo "DONE! :)"
